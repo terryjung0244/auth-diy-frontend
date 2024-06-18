@@ -1,22 +1,6 @@
 import React, { useState } from "react";
-import { signUpAPI, verifyEmailAPI } from "../service/api";
-
-export interface ISignUpStateType {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-}
-
-export interface IVerifyInputStateType {
-  statusCode: boolean | number;
-  verifyOTPInput: string;
-}
-
-export interface IVerifyOTPandEmailParams {
-  verifyOTPInput: string;
-  email: string;
-}
+import { resendOTPAPI, signUpAPI, verifyEmailAPI } from "../service/api";
+import { ISignUpStateType, IVerifyInputStateType } from "./SignUp.interface";
 
 const SignUp = () => {
   const [verifyInput, setVerifyInput] = useState<IVerifyInputStateType>({
@@ -39,15 +23,15 @@ const SignUp = () => {
   };
 
   const handleVerifyEmail = async () => {
-    await verifyEmailAPI({
+    const result = await verifyEmailAPI({
       verifyOTPInput: verifyInput.verifyOTPInput,
       email: signUpInput.email,
     });
+    alert(result.message);
   };
 
-  const handleSignUp = async () => {
+  const handleCreateAccount = async () => {
     const result = await signUpAPI(signUpInput);
-    console.log(result);
     if (result.statusCode === 200) {
       setVerifyInput({ ...verifyInput, statusCode: true });
       return;
@@ -55,9 +39,18 @@ const SignUp = () => {
     alert(result.message);
   };
 
+  const handleResendOTP = async () => {
+    const result = await resendOTPAPI({
+      verifyOTPInput: verifyInput.verifyOTPInput,
+      email: signUpInput.email,
+    });
+    alert(result.message);
+  };
+
   return (
     <div style={{ marginLeft: "100px", marginTop: "100px" }}>
       <h2>Sign Up</h2>
+      {/* <button onClick={}>Delete All Data</button> */}
       <div style={{ display: "flex", flexDirection: "column", width: "250px" }}>
         <input
           placeholder="First Name"
@@ -83,7 +76,7 @@ const SignUp = () => {
           value={signUpInput.password}
           onChange={handleSignUpInput}
         />
-        <button onClick={handleSignUp}>Create Account</button>
+        <button onClick={handleCreateAccount}>Create Account</button>
       </div>
       {verifyInput.statusCode && (
         <div>
@@ -94,6 +87,7 @@ const SignUp = () => {
             onChange={handleVerifyOTPInput}
           />
           <button onClick={handleVerifyEmail}>Verify</button>
+          <button onClick={handleResendOTP}>Resend OTP</button>
         </div>
       )}
     </div>
